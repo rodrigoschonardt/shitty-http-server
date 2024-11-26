@@ -43,3 +43,11 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+gradlew
+gradlew.bat
+gradle.properties
+settings.gradle.kts
+.idea
+
+gradle
