@@ -1,10 +1,13 @@
 package rodrigoshonardt
 
+import rodrigoshonardt.data.Request
+import rodrigoshonardt.data.Response
 import java.net.ServerSocket
 
 class Server(private val port : Int) : AutoCloseable {
     private lateinit var serverSocket : ServerSocket
     private var running = false
+    private val routes = mutableMapOf<String, (Request) -> Response>()
 
     fun startServer() {
         serverSocket = ServerSocket(port)
@@ -31,12 +34,12 @@ class Server(private val port : Int) : AutoCloseable {
                             val output = it.getOutputStream()
 
                             val firstLine = input.readLine() ?: return@Thread
-                            val route = firstLine.split(' ')[1]
+                            val route = firstLine.split(' ')[1] // TODO convert all to Request object
 
-                            val response = if (route == "/") {
-                                "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK"
-                            } else {
-                                "HTTP/1.1 404 Not Found\r\nContent-Length: 9\r\n\r\nNot found"
+                            var response = "HTTP/1.1 404 Not Found\r\nContent-Length: 9\r\n\r\nNot found"
+
+                            if (routes.containsKey(route)) {
+                                response = routes[route]?.invoke(Request(route))?.data.toString()
                             }
 
                             output.write(response.toByteArray())
@@ -51,6 +54,10 @@ class Server(private val port : Int) : AutoCloseable {
                 }
             }
         }.start()
+    }
+
+    fun addRoute(route : String, handler : (Request) -> Response) {
+        routes[route] = handler // TODO add params handling
     }
 
     override fun close() {

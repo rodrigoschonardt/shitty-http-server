@@ -1,4 +1,5 @@
 import rodrigoshonardt.Server
+import rodrigoshonardt.data.Response
 import java.net.HttpURLConnection
 import java.net.URI
 import java.util.UUID
@@ -9,6 +10,11 @@ class ServerTests {
     @Test
     fun serverMustRespondWith200() {
         val server = Server(4232)
+
+        server.addRoute( "/", { request ->
+            println("teste")
+            Response("HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK")
+        } )
 
         server.startServer()
         server.use {
